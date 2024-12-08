@@ -1,0 +1,8 @@
+matplotlib
+networkx
+numpy
+scikit-learn
+scipy
+seaborn
+wordcloud
+umap-learn

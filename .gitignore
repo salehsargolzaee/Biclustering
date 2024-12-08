@@ -1,2 +1,20 @@
+# Python Cache.
+__pycache__
+
+# Virtual Environment.
+venv
+
+# JetBrains PyCharm Cache.
+.idea
+
+# VS Code Cache.
+.vscode
+
+# Ignore MAC folders.
 .DS_Store
-.ipynb_checkpoints/
+
+# Ignore PyTorch checkpoint files.
+*.pth
+
+# Ignore Junpyter notebook checkpoints.
+.ipynb_checkpoints
