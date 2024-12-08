@@ -10,6 +10,7 @@ import numpy as np
 import seaborn as sns
 import umap
 from scipy.cluster.hierarchy import linkage, leaves_list
+from sklearn.cluster import KMeans, SpectralClustering
 from sklearn.datasets import fetch_20newsgroups
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.manifold import TSNE
@@ -107,7 +108,8 @@ def display_fused_modules(
         fused_features: List[Set[int]],
         fused_samples: List[Set[int]],
         feature_labels: List[str],
-        sample_labels: List[str]
+        sample_labels: List[str],
+        name: str
 ) -> None:
     """
     Display the fused modules with feature and sample labels.
@@ -115,14 +117,15 @@ def display_fused_modules(
     :param fused_samples: List of sets containing sample indices.
     :param feature_labels: List mapping feature indices to feature names.
     :param sample_labels: List mapping sample indices to sample names.
+    :param name: Model name.
     :return: Nothing.
     """
     for i, (features, samples) in enumerate(zip(fused_features, fused_samples), 1):
         feature_names = [feature_labels[idx] for idx in features]
         sample_names = [sample_labels[idx] for idx in samples]
-        print(f"Fused Module {i}:")
+        print(f"{name} Fused Module {i}:")
         print(f"  Features: {sorted(feature_names)}")
-        print(f"  Samples: {sorted(sample_names)}\n")
+        print(f"  Samples: {sorted(sample_names)}")
 
 
 def threshold(x: np.array, t: int) -> np.array:
@@ -225,6 +228,71 @@ def manifold(sample_vec: List[Set[int] or np.ndarray], feature_vec, data, title:
     plt.close(fig)
 
 
+def display(sample_vec, feature_vec, name: str, vectorizer, data, labels, n_features) -> None:
+    """
+    Create plots.
+    :param sample_vec: The sample vectors.
+    :param feature_vec: The features.
+    :param name: The name for plots saving.
+    :param vectorizer: The vectorizer.
+    :param data: The data.
+    :param labels: The labels.
+    :param n_features: The number of features.
+    :return: Nothing.
+    """
+    display_fused_modules(fused_features=feature_vec, fused_samples=sample_vec,
+                          feature_labels=vectorizer.get_feature_names_out(), sample_labels=labels, name=name)
+    words = vectorizer.get_feature_names_out()
+    # Get all samples and features.
+    upper = min(len(sample_vec), len(feature_vec))
+    for ind in range(upper):
+        samples, features = sorted(list(sample_vec[ind])), sorted(list(feature_vec[ind]))
+        bicluster = data[samples][:, features]
+        # Perform hierarchical clustering for rows and columns.
+        row_linkage = linkage(bicluster, method="ward")
+        col_linkage = linkage(bicluster.T, method="ward")
+        # Get the order of rows and columns based on the clustering.
+        row_order = leaves_list(row_linkage)
+        col_order = leaves_list(col_linkage)
+        # Reorder the data based on clustering.
+        reordered_data = bicluster[row_order, :][:, col_order]
+        fig = plt.figure(figsize=(25, 8), dpi=200)
+        sns.heatmap(reordered_data, cmap="viridis", annot=False)
+        title = f"{name} Bicluster {ind + 1} Heatmap"
+        plt.title(title)
+        plt.xlabel("Terms")
+        plt.ylabel("Documents")
+        plt.xticks([])
+        plt.yticks([])
+        fig.savefig(os.path.join("Results", f"{title}.png"))
+        plt.close(fig)
+        samples, features = sorted(list(sample_vec[ind])), sorted(list(feature_vec[ind]))
+        bicluster_terms = {words[word_ind]: np.mean(data[samples, :][:, word_ind]) for word_ind in features}
+        wc = WordCloud(width=800, height=400, background_color="white").generate_from_frequencies(bicluster_terms)
+        fig = plt.figure(figsize=(10, 6))
+        plt.imshow(wc, interpolation="bilinear")
+        plt.axis("off")
+        title = f"{name} Word Cloud for Bicluster {ind + 1}"
+        plt.title(title)
+        fig.savefig(os.path.join("Results", f"{title}.png"))
+        plt.close(fig)
+    manifold(sample_vec, feature_vec, data, f"{name} t_sne of biclustering solution")
+    manifold(
+        [np.where(labels == label)[0] for label in np.unique(labels)],
+        np.array([np.arange(n_features) for _ in labels]),
+        data,
+        f"{name} t_sne of the original data"
+    )
+    manifold(sample_vec, feature_vec, data, f"{name} u_map of biclustering solution", manifold_learner="umap")
+    manifold(
+        [np.where(labels == label)[0] for label in np.unique(labels)],
+        np.array([np.arange(n_features) for _ in labels]),
+        data,
+        f"{name} u_map of original data",
+        manifold_learner="umap"
+    )
+
+
 def main() -> None:
     """
     Perform experiments.
@@ -260,7 +328,6 @@ def main() -> None:
     labels = np.array(labels)
     unique_labels, category_sizes = np.unique(labels, return_counts=True)
     true_k = unique_labels.shape[0]
-    print(f"{len(original)} documents - {true_k} categories")
     # Save a sample file.
     with open(os.path.join("Results", f"Raw Sample.txt"), "w") as file:
         file.write(str(original[0]))
@@ -268,10 +335,17 @@ def main() -> None:
     vectorizer = TfidfVectorizer(max_df=0.5, min_df=4, stop_words="english")
     t0 = time()
     x_tfidf = vectorizer.fit_transform(original)
-    print(f"Vectorization done in {time() - t0:.3f} s")
+    vectorization_time = time() - t0
     data = np.array(x_tfidf.todense())
     n_samples, n_features = data.shape
-    print(f"Samples = {n_samples} | Features = {n_features}")
+    print(f"{true_k} Categories | {n_samples} Samples | {n_features} Features | Vectorization done in "
+          f"{vectorization_time:.3f} s")
+    # Save dataset statistics.
+    with open(os.path.join("Results", f"Dataset.csv"), "w") as file:
+        file.write(f"Attribute,Value\n"
+                   f"Categories,{true_k}\n"
+                   f"Samples,{n_samples}\n"
+                   f"Features,{n_features}")
     # Plot data.
     plt.figure(dpi=200)
     plt.imshow(data, cmap="gray")
@@ -281,47 +355,57 @@ def main() -> None:
     t0 = time()
     sample_vec, feature_vec = isa(data, n_initial=2000, n_updates=20, thresh_feature=1.6, thresh_sample=1.1,
                                   fusion_similarity_threshold=0.7)
-    print(f"ISA done in {time() - t0:.3f} s")
-    display_fused_modules(fused_features=feature_vec, fused_samples=sample_vec,
-                          feature_labels=vectorizer.get_feature_names_out(), sample_labels=labels)
-    words = vectorizer.get_feature_names_out()
-    # Get all samples and features.
-    ind = 0
-    samples, features = sorted(list(sample_vec[ind])), sorted(list(feature_vec[ind]))
-    bicluster = data[samples][:, features]
-    # Perform hierarchical clustering for rows and columns.
-    row_linkage = linkage(bicluster, method="ward")
-    col_linkage = linkage(bicluster.T, method="ward")
-    # Get the order of rows and columns based on the clustering.
-    row_order = leaves_list(row_linkage)
-    col_order = leaves_list(col_linkage)
-    # Reorder the data based on clustering.
-    reordered_data = bicluster[row_order, :][:, col_order]
-    fig = plt.figure(figsize=(25, 8), dpi=200)
-    sns.heatmap(reordered_data, cmap="viridis", annot=False)
-    title = f"Bicluster {ind + 1} Heatmap"
-    plt.title(title)
-    plt.xlabel("Terms")
-    plt.ylabel("Documents")
-    plt.xticks([])
-    plt.yticks([])
-    fig.savefig(os.path.join("Results", f"{title}.png"))
-    plt.close(fig)
-    ind = 0
-    samples, features = sorted(list(sample_vec[ind])), sorted(list(feature_vec[ind]))
-    bicluster_terms = {words[word_ind]: np.mean(data[samples, :][:, word_ind]) for word_ind in features}
-    wordcloud = WordCloud(width=800, height=400, background_color="white").generate_from_frequencies(bicluster_terms)
-    fig = plt.figure(figsize=(10, 6))
-    plt.imshow(wordcloud, interpolation="bilinear")
-    plt.axis("off")
-    title = f"Word Cloud for Bicluster {ind + 1}"
-    plt.title(title)
-    fig.savefig(os.path.join("Results", f"{title}.png"))
-    plt.close(fig)
-    manifold(sample_vec, feature_vec, data, "t_sne of biclustering solution")
-    manifold([np.where(labels == label)[0] for label in np.unique(labels)], np.array([np.arange(n_features) for _ in labels]), data, "t_sne of the original data")
-    manifold(sample_vec, feature_vec, data, "u_map of biclustering solution", manifold_learner="umap")
-    manifold([np.where(labels == label)[0] for label in np.unique(labels)], np.array([np.arange(n_features) for _ in labels]), data, "u_map of original data", manifold_learner="umap")
+    isa_time = time() - t0
+    print(f"ISA done in {isa_time:.3f} s")
+    display(sample_vec, feature_vec, "ISA", vectorizer, data, labels, n_features)
+    # Perform K-Means.
+    kmeans = KMeans(n_clusters=true_k, random_state=42)
+    t0 = time()
+    kmeans.fit(data)
+    kmeans_time = time() - t0
+    print(f"K-Means done in {kmeans_time:.3f} s")
+    # Construct sample_vec.
+    sample_vec = []
+    for cluster_label in range(true_k):
+        sample_indices = np.where(kmeans.labels_ == cluster_label)[0]
+        sample_vec.append(set(sample_indices))
+    # Construct feature_vec from cluster centroids.
+    n_top_features = 50
+    feature_vec = []
+    for cluster_label in range(true_k):
+        centroid = kmeans.cluster_centers_[cluster_label]
+        top_feature_indices = np.argsort(centroid)[-n_top_features:]
+        feature_vec.append(set(top_feature_indices))
+    display(sample_vec, feature_vec, "K-Means", vectorizer, data, labels, n_features)
+    # Perform spectral clustering.
+    spectral = SpectralClustering(n_clusters=true_k, random_state=42, affinity="nearest_neighbors")
+    t0 = time()
+    spectral_labels = spectral.fit_predict(data)
+    spectral_time = time() - t0
+    print(f"Spectral Clustering done in {spectral_time:.3f} s")
+    # Construct sample_vec from the spectral clustering assignments.
+    sample_vec = []
+    for cluster_label in range(true_k):
+        sample_indices = np.where(spectral_labels == cluster_label)[0]
+        sample_vec.append(set(sample_indices))
+    # Construct feature_vec by computing a centroid for each cluster.
+    n_top_features = 50
+    feature_vec = []
+    for cluster_label in range(true_k):
+        cluster_data = data[list(sample_vec[cluster_label])]
+        # Compute the mean TF-IDF vector for the cluster.
+        centroid = np.mean(cluster_data, axis=0)
+        top_feature_indices = np.argsort(centroid)[-n_top_features:]
+        feature_vec.append(set(top_feature_indices))
+    # Display results for Spectral Clustering.
+    display(sample_vec, feature_vec, "Spectral", vectorizer, data, labels, n_features)
+    # Save computation times statistics.
+    with open(os.path.join("Results", f"Times.csv"), "w") as file:
+        file.write(f"Model,Time (seconds)\n"
+                   f"Vectorization,{vectorization_time:.3f}\n"
+                   f"ISA,{isa_time:.3f}\n"
+                   f"K-Means,{kmeans_time:.3f}\n"
+                   f"Spectral,{spectral_time:.3f}")
 
 
 if __name__ == "__main__":
