@@ -58,9 +58,9 @@ def jaccard_similarity(set1: Set[int], set2: Set[int]) -> float:
 
 
 def fuse_fixed_points_vectors(
-        feature_vectors: np.ndarray,
-        sample_vectors: np.ndarray,
-        similarity_threshold: float = 0.7
+    feature_vectors: np.ndarray,
+    sample_vectors: np.ndarray,
+    similarity_threshold: float = 0.7,
 ) -> tuple[list[set], list[set[set[int] | list[set[int]]]]]:
     """
     Fuse similar fixed points based on their feature and sample vectors.
@@ -73,7 +73,9 @@ def fuse_fixed_points_vectors(
     samples in a module
     """
     if feature_vectors.shape[0] != sample_vectors.shape[0]:
-        raise ValueError("feature_vectors and sample_vectors must have the same number of fixed points (rows).")
+        raise ValueError(
+            "feature_vectors and sample_vectors must have the same number of fixed points (rows)."
+        )
     num_fixed_points = feature_vectors.shape[0]
     g = nx.Graph()
     # Nodes are indices of fixed points.
@@ -105,11 +107,11 @@ def fuse_fixed_points_vectors(
 
 
 def display_fused_modules(
-        fused_features: List[Set[int]],
-        fused_samples: List[Set[int]],
-        feature_labels: List[str],
-        sample_labels: List[str],
-        name: str
+    fused_features: List[Set[int]],
+    fused_samples: List[Set[int]],
+    feature_labels: List[str],
+    sample_labels: List[str],
+    name: str,
 ) -> None:
     """
     Display the fused modules with feature and sample labels.
@@ -120,12 +122,16 @@ def display_fused_modules(
     :param name: Model name.
     :return: Nothing.
     """
+    results = ""
     for i, (features, samples) in enumerate(zip(fused_features, fused_samples), 1):
         feature_names = [feature_labels[idx] for idx in features]
         sample_names = [sample_labels[idx] for idx in samples]
-        print(f"{name} Fused Module {i}:")
-        print(f"  Features: {sorted(feature_names)}")
-        print(f"  Samples: {sorted(sample_names)}")
+        results += f"{name} Fused Module {i}:\n"
+        results += f"Features: {sorted(feature_names)}\n"
+        results += f"Samples: {sorted(sample_names)}\n\n"
+        print(results)
+    with open(os.path.join("Results", name, f"biclusters.txt"), "w") as file:
+        file.write(results)
 
 
 def threshold(x: np.array, t: int) -> np.array:
@@ -148,11 +154,21 @@ def f(x: np.array, t_feature: int = None, t_sample: int = None) -> np.array:
     :param t_sample: Sample/
     :return: The threshold.
     """
-    return x * threshold(x=x, t=t_feature) if t_feature is not None else x * threshold(x=x, t=t_sample)
+    return (
+        x * threshold(x=x, t=t_feature)
+        if t_feature is not None
+        else x * threshold(x=x, t=t_sample)
+    )
 
 
-def isa(data: np.array, n_initial: int = 1000, n_updates=1000, thresh_feature: int = 0, thresh_sample: int = 0,
-        fusion_similarity_threshold: float = 0.8):
+def isa(
+    data: np.array,
+    n_initial: int = 1000,
+    n_updates=1000,
+    thresh_feature: int = 0,
+    thresh_sample: int = 0,
+    fusion_similarity_threshold: float = 0.8,
+):
     """
     Perform ISA.
     :param data: The data.
@@ -181,15 +197,20 @@ def isa(data: np.array, n_initial: int = 1000, n_updates=1000, thresh_feature: i
     all_sample_vectors = np.array(all_sample_vectors)
     # Perform fusion.
     fused_features, fused_samples = fuse_fixed_points_vectors(
-        all_feature_vectors,
-        all_sample_vectors,
-        fusion_similarity_threshold
+        all_feature_vectors, all_sample_vectors, fusion_similarity_threshold
     )
     return fused_samples, fused_features
 
 
-def manifold(sample_vec: List[Set[int] or np.ndarray], feature_vec, data, title: str, manifold_learner: str = "tsne",
-             random_state: int = 42) -> None:
+def manifold(
+    sample_vec: List[Set[int] or np.ndarray],
+    feature_vec,
+    data,
+    title: str,
+    name: str,
+    manifold_learner: str = "tsne",
+    random_state: int = 42,
+) -> None:
     """
     Perform manifold on a sample.
     :param sample_vec: Samples.
@@ -221,14 +242,18 @@ def manifold(sample_vec: List[Set[int] or np.ndarray], feature_vec, data, title:
     fig = plt.figure(figsize=(10, 6))
     for i, cluster_label in enumerate(set(cluster_labels)):
         cluster_points = embedded[np.array(cluster_labels) == cluster_label]
-        plt.scatter(cluster_points[:, 0], cluster_points[:, 1], label=f"Cluster {i + 1}")
+        plt.scatter(
+            cluster_points[:, 0], cluster_points[:, 1], label=f"Cluster {i + 1}"
+        )
     plt.title(title)
     plt.legend()
-    fig.savefig(os.path.join("Results", f"{title}.png"))
+    fig.savefig(os.path.join("Results", name, f"{title}.png"))
     plt.close(fig)
 
 
-def display(sample_vec, feature_vec, name: str, vectorizer, data, labels, n_features) -> None:
+def display(
+    sample_vec, feature_vec, name: str, vectorizer, data, labels, n_features
+) -> None:
     """
     Create plots.
     :param sample_vec: The sample vectors.
@@ -240,13 +265,23 @@ def display(sample_vec, feature_vec, name: str, vectorizer, data, labels, n_feat
     :param n_features: The number of features.
     :return: Nothing.
     """
-    display_fused_modules(fused_features=feature_vec, fused_samples=sample_vec,
-                          feature_labels=vectorizer.get_feature_names_out(), sample_labels=labels, name=name)
+    os.makedirs(os.path.join("Results", name), exist_ok=True)
+
+    display_fused_modules(
+        fused_features=feature_vec,
+        fused_samples=sample_vec,
+        feature_labels=vectorizer.get_feature_names_out(),
+        sample_labels=labels,
+        name=name,
+    )
+
     words = vectorizer.get_feature_names_out()
     # Get all samples and features.
     upper = min(len(sample_vec), len(feature_vec))
     for ind in range(upper):
-        samples, features = sorted(list(sample_vec[ind])), sorted(list(feature_vec[ind]))
+        samples, features = sorted(list(sample_vec[ind])), sorted(
+            list(feature_vec[ind])
+        )
         bicluster = data[samples][:, features]
         # Perform hierarchical clustering for rows and columns.
         row_linkage = linkage(bicluster, method="ward")
@@ -264,32 +299,48 @@ def display(sample_vec, feature_vec, name: str, vectorizer, data, labels, n_feat
         plt.ylabel("Documents")
         plt.xticks([])
         plt.yticks([])
-        fig.savefig(os.path.join("Results", f"{title}.png"))
+        fig.savefig(os.path.join("Results", name, f"{title}.png"))
         plt.close(fig)
-        samples, features = sorted(list(sample_vec[ind])), sorted(list(feature_vec[ind]))
-        bicluster_terms = {words[word_ind]: np.mean(data[samples, :][:, word_ind]) for word_ind in features}
-        wc = WordCloud(width=800, height=400, background_color="white").generate_from_frequencies(bicluster_terms)
+        samples, features = sorted(list(sample_vec[ind])), sorted(
+            list(feature_vec[ind])
+        )
+        bicluster_terms = {
+            words[word_ind]: np.mean(data[samples, :][:, word_ind])
+            for word_ind in features
+        }
+        wc = WordCloud(
+            width=800, height=400, background_color="white"
+        ).generate_from_frequencies(bicluster_terms)
         fig = plt.figure(figsize=(10, 6))
         plt.imshow(wc, interpolation="bilinear")
         plt.axis("off")
         title = f"{name} Word Cloud for Bicluster {ind + 1}"
         plt.title(title)
-        fig.savefig(os.path.join("Results", f"{title}.png"))
+        fig.savefig(os.path.join("Results", name, f"{title}.png"))
         plt.close(fig)
-    manifold(sample_vec, feature_vec, data, f"{name} t_sne of biclustering solution")
+    manifold(sample_vec, feature_vec, data, f"{name} t_sne of solution", name)
     manifold(
         [np.where(labels == label)[0] for label in np.unique(labels)],
         np.array([np.arange(n_features) for _ in labels]),
         data,
-        f"{name} t_sne of the original data"
+        f"{name} t_sne of the original data",
+        name,
     )
-    manifold(sample_vec, feature_vec, data, f"{name} u_map of biclustering solution", manifold_learner="umap")
+    manifold(
+        sample_vec,
+        feature_vec,
+        data,
+        f"{name} u_map of biclustering solution",
+        name,
+        manifold_learner="umap",
+    )
     manifold(
         [np.where(labels == label)[0] for label in np.unique(labels)],
         np.array([np.arange(n_features) for _ in labels]),
         data,
         f"{name} u_map of original data",
-        manifold_learner="umap"
+        name,
+        manifold_learner="umap",
     )
 
 
@@ -299,8 +350,9 @@ def main() -> None:
     :return: Nothing.
     """
     # Set random states.
-    random.seed(42)
-    np.random.seed(42)
+    random_state = 42
+    random.seed(random_state)
+    np.random.seed(random_state)
     # Ensure the results folder exists.
     if not os.path.exists("Results"):
         os.mkdir("Results")
@@ -314,16 +366,17 @@ def main() -> None:
             "comp.graphics",
             "sci.space",
             "rec.sport.hockey",
-            "soc.religion.christian"
+            "soc.religion.christian",
         ],
         shuffle=True,
-        random_state=42,
+        random_state=random_state,
     )
     # Process the data.
+    number_of_data_points = 300
     indices = np.arange(len(dataset.target))
     np.random.shuffle(indices)
-    original = np.array(dataset.data)[indices[:300]]
-    labels = dataset.target[indices[:300]]
+    original = np.array(dataset.data)[indices[:number_of_data_points]]
+    labels = dataset.target[indices[:number_of_data_points]]
     original = np.array(original)
     labels = np.array(labels)
     unique_labels, category_sizes = np.unique(labels, return_counts=True)
@@ -338,14 +391,18 @@ def main() -> None:
     vectorization_time = time() - t0
     data = np.array(x_tfidf.todense())
     n_samples, n_features = data.shape
-    print(f"{true_k} Categories | {n_samples} Samples | {n_features} Features | Vectorization done in "
-          f"{vectorization_time:.3f} s")
+    print(
+        f"{true_k} Categories | {n_samples} Samples | {n_features} Features | Vectorization done in "
+        f"{vectorization_time:.3f} s"
+    )
     # Save dataset statistics.
     with open(os.path.join("Results", f"Dataset.csv"), "w") as file:
-        file.write(f"Attribute,Value\n"
-                   f"Categories,{true_k}\n"
-                   f"Samples,{n_samples}\n"
-                   f"Features,{n_features}")
+        file.write(
+            f"Attribute,Value\n"
+            f"Categories,{true_k}\n"
+            f"Samples,{n_samples}\n"
+            f"Features,{n_features}"
+        )
     # Plot data.
     plt.figure(dpi=200)
     plt.imshow(data, cmap="gray")
@@ -353,13 +410,20 @@ def main() -> None:
     plt.xlabel("Features")
     # Perform ISA.
     t0 = time()
-    sample_vec, feature_vec = isa(data, n_initial=2000, n_updates=20, thresh_feature=1.6, thresh_sample=1.1,
-                                  fusion_similarity_threshold=0.7)
+    sample_vec, feature_vec = isa(
+        data,
+        n_initial=2000,
+        n_updates=20,
+        thresh_feature=1.6,
+        thresh_sample=1.1,
+        fusion_similarity_threshold=0.7,
+    )
     isa_time = time() - t0
     print(f"ISA done in {isa_time:.3f} s")
     display(sample_vec, feature_vec, "ISA", vectorizer, data, labels, n_features)
+
     # Perform K-Means.
-    kmeans = KMeans(n_clusters=true_k, random_state=42)
+    kmeans = KMeans(n_clusters=true_k, random_state=random_state)
     t0 = time()
     kmeans.fit(data)
     kmeans_time = time() - t0
@@ -378,7 +442,9 @@ def main() -> None:
         feature_vec.append(set(top_feature_indices))
     display(sample_vec, feature_vec, "K-Means", vectorizer, data, labels, n_features)
     # Perform spectral clustering.
-    spectral = SpectralClustering(n_clusters=true_k, random_state=42, affinity="nearest_neighbors")
+    spectral = SpectralClustering(
+        n_clusters=true_k, random_state=random_state, affinity="nearest_neighbors"
+    )
     t0 = time()
     spectral_labels = spectral.fit_predict(data)
     spectral_time = time() - t0
@@ -401,11 +467,13 @@ def main() -> None:
     display(sample_vec, feature_vec, "Spectral", vectorizer, data, labels, n_features)
     # Save computation times statistics.
     with open(os.path.join("Results", f"Times.csv"), "w") as file:
-        file.write(f"Model,Time (seconds)\n"
-                   f"Vectorization,{vectorization_time:.3f}\n"
-                   f"ISA,{isa_time:.3f}\n"
-                   f"K-Means,{kmeans_time:.3f}\n"
-                   f"Spectral,{spectral_time:.3f}")
+        file.write(
+            f"Model,Time (seconds)\n"
+            f"Vectorization,{vectorization_time:.3f}\n"
+            f"ISA,{isa_time:.3f}\n"
+            f"K-Means,{kmeans_time:.3f}\n"
+            f"Spectral,{spectral_time:.3f}"
+        )
 
 
 if __name__ == "__main__":
