@@ -1,5 +1,5 @@
 Model,Time (seconds)
-Vectorization,0.078
-ISA,24.278
-K-Means,0.009
-Spectral,0.030
+Vectorization,0.082
+ISA,0.000
+K-Means,0.016
+Spectral,0.036

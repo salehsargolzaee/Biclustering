@@ -1,0 +1,15 @@
+ISA/f-1 s-2.2 fs-0.6 Fused Module 1:
+Features: ['20', '25', '60', '80', '_is_', 'actions', 'activities', 'add', 'age', 'air', 'area', 'away', 'based', 'black', 'changed', 'come', 'comments', 'commercial', 'concerning', 'consider', 'currently', 'desire', 'directly', 'east', 'effect', 'exists', 'felt', 'flight', 'friends', 'gets', 'getting', 'ground', 'half', 'hands', 'heard', 'heaven', 'high', 'humans', 'hundreds', 'idea', 'imagine', 'impact', 'impressive', 'international', 'involved', 'know', 'known', 'larger', 'levels', 'life', 'light', 'like', 'live', 'local', 'look', 'lots', 'main', 'man', 'matters', 'mean', 'men', 'modern', 'nature', 'night', 'open', 'path', 'perfect', 'perfectly', 'place', 'places', 'pollution', 'posting', 'practical', 'products', 'pure', 'quickly', 'reach', 'religions', 'research', 'rest', 'seen', 'sense', 'sight', 'size', 'sky', 'stars', 'supporting', 'suppose', 'television', 'thousands', 'time', 'trying', 'universe', 've', 'view', 'watch']
+Samples_indices: [88, 152]
+Samples_labels: [3, 3]
+
+ISA/f-1 s-2.2 fs-0.6 Fused Module 2:
+Features: ['000', '10', '15', '20', '50', '500', 'activities', 'ad', 'agency', 'air', 'approach', 'association', 'available', 'budget', 'build', 'burn', 'california', 'changes', 'chief', 'commitment', 'company', 'concept', 'construction', 'costs', 'dc', 'demonstrate', 'design', 'designed', 'developed', 'development', 'dr', 'energy', 'feet', 'final', 'flight', 'force', 'future', 'government', 'held', 'higher', 'hundreds', 'include', 'includes', 'industry', 'international', 'june', 'key', 'landing', 'large', 'launch', 'lead', 'light', 'lunar', 'members', 'model', 'models', 'mr', 'nasa', 'national', 'orbital', 'organization', 'organizations', 'particularly', 'passing', 'power', 'president', 'press', 'produce', 'program', 'programs', 'range', 'reach', 'release', 'required', 'research', 'responsible', 'road', 'robert', 'rocket', 'rockets', 'said', 'series', 'ship', 'single', 'space', 'spacecraft', 'stage', 'station', 'structure', 'summer', 'systems', 'technical', 'technology', 'test', 'today', 'university', 'uses', 'various', 'vehicle', 'vice', 'went', 'white', 'william', 'won']
+Samples_indices: [35, 101, 270, 243, 157]
+Samples_labels: [3, 3, 3, 3, 3]
+
+ISA/f-1 s-2.2 fs-0.6 Fused Module 3:
+Features: ['17', '18', '27', 'act', 'acts', 'actually', 'admit', 'assume', 'atheists', 'attempt', 'bad', 'bible', 'body', 'calling', 'case', 'chief', 'child', 'clear', 'concerning', 'conclude', 'content', 'death', 'did', 'died', 'different', 'discussed', 'does', 'edge', 'entirely', 'explain', 'explanation', 'fall', 'feet', 'field', 'gave', 'getting', 'given', 'highly', 'historical', 'important', 'info', 'let', 'luke', 'man', 'manner', 'meaning', 'middle', 'mr', 'necessarily', 'new', 'notice', 'observations', 'open', 'people', 'peter', 'pieces', 'point', 'possible', 'present', 'references', 'reply', 'result', 'reward', 'said', 'say', 'says', 'silver', 'source', 'sources', 'specifically', 'state', 'stated', 'strangers', 'study', 'testament', 'took', 'use', 'used', 'way', 'went', 'word']
+Samples_indices: [154, 78]
+Samples_labels: [0, 5]
+

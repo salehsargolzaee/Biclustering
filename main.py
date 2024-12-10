@@ -3,6 +3,7 @@ import random
 from itertools import combinations
 from time import time
 from typing import List, Set
+from collections import Counter
 
 import matplotlib.pyplot as plt
 import networkx as nx
@@ -76,6 +77,10 @@ def fuse_fixed_points_vectors(
         raise ValueError(
             "feature_vectors and sample_vectors must have the same number of fixed points (rows)."
         )
+
+    if feature_vectors.shape[0] == 0:
+        return list(set()), list(set())
+
     num_fixed_points = feature_vectors.shape[0]
     g = nx.Graph()
     # Nodes are indices of fixed points.
@@ -128,8 +133,9 @@ def display_fused_modules(
         sample_names = [sample_labels[idx] for idx in samples]
         results += f"{name} Fused Module {i}:\n"
         results += f"Features: {sorted(feature_names)}\n"
-        results += f"Samples: {sorted(sample_names)}\n\n"
-        print(results)
+        results += f"Samples_indices: {list(map(lambda x: int(x), samples))}\n"
+        results += f"Samples_labels: {list(map(lambda x: int(x), sample_names))}\n\n"
+        # print(results)
     with open(os.path.join("Results", name, f"biclusters.txt"), "w") as file:
         file.write(results)
 
@@ -165,8 +171,8 @@ def isa(
     data: np.array,
     n_initial: int = 1000,
     n_updates=1000,
-    thresh_feature: int = 0,
-    thresh_sample: int = 0,
+    thresh_feature: float = 0,
+    thresh_sample: float = 0,
     fusion_similarity_threshold: float = 0.8,
 ):
     """
@@ -191,6 +197,10 @@ def isa(
         for i in range(n_updates):
             sample_vector = f(r_data.dot(feature_vector), t_sample=thresh_sample)
             feature_vector = f(c_data.T.dot(sample_vector), t_feature=thresh_feature)
+
+        if sum(sample_vector != 0) < 2 or sum(feature_vector != 0) < 2:
+            continue
+
         all_feature_vectors.append(feature_vector)
         all_sample_vectors.append(sample_vector)
     all_feature_vectors = np.array(all_feature_vectors)
@@ -231,10 +241,19 @@ def manifold(
         samples = sorted(list(sample_vec[i]))
         solution.extend(data[samples, :][:, all_features])
         cluster_labels.extend([i + 1] * len(sample_vec[i]))
+
+    if len(solution) <= 1:
+        return
+
     solution = np.array(solution)
     solution = row_normalization(solution)
+
     if manifold_learner == "tsne":
-        tsne = TSNE(n_components=2, random_state=random_state)
+        tsne = TSNE(
+            n_components=2,
+            random_state=random_state,
+            perplexity=len(solution) - 1,
+        )
         embedded = tsne.fit_transform(solution)
     else:
         reducer = umap.UMAP(random_state=random_state)
@@ -293,7 +312,7 @@ def display(
         reordered_data = bicluster[row_order, :][:, col_order]
         fig = plt.figure(figsize=(25, 8), dpi=200)
         sns.heatmap(reordered_data, cmap="viridis", annot=False)
-        title = f"{name} Bicluster {ind + 1} Heatmap"
+        title = f"{name if "/" not in name else ""} Bicluster {ind + 1} Heatmap"
         plt.title(title)
         plt.xlabel("Terms")
         plt.ylabel("Documents")
@@ -314,23 +333,29 @@ def display(
         fig = plt.figure(figsize=(10, 6))
         plt.imshow(wc, interpolation="bilinear")
         plt.axis("off")
-        title = f"{name} Word Cloud for Bicluster {ind + 1}"
+        title = f"{name if "/" not in name else ""} Word Cloud for Bicluster {ind + 1}"
         plt.title(title)
         fig.savefig(os.path.join("Results", name, f"{title}.png"))
         plt.close(fig)
-    manifold(sample_vec, feature_vec, data, f"{name} t_sne of solution", name)
+    manifold(
+        sample_vec,
+        feature_vec,
+        data,
+        f"{name if "/" not in name else ""} t_sne of solution",
+        name,
+    )
     manifold(
         [np.where(labels == label)[0] for label in np.unique(labels)],
         np.array([np.arange(n_features) for _ in labels]),
         data,
-        f"{name} t_sne of the original data",
+        f"{name if "/" not in name else ""} t_sne of the original data",
         name,
     )
     manifold(
         sample_vec,
         feature_vec,
         data,
-        f"{name} u_map of biclustering solution",
+        f"{name if "/" not in name else ""} u_map of biclustering solution",
         name,
         manifold_learner="umap",
     )
@@ -338,10 +363,50 @@ def display(
         [np.where(labels == label)[0] for label in np.unique(labels)],
         np.array([np.arange(n_features) for _ in labels]),
         data,
-        f"{name} u_map of original data",
+        f"{name if "/" not in name else ""} u_map of original data",
         name,
         manifold_learner="umap",
     )
+
+
+def ISA_hyperparameter_test(
+    data: np.array,
+    vectorizer,
+    labels,
+    n_features,
+    ts_feature: List[float] = [0.0],
+    ts_sample: List[float] = [0.0],
+    fs_ts: List[float] = [0.7],
+) -> None:
+    """
+    Perform ISA using different hyperparameters.
+    :param data: The data.
+    :param vectorizer: The vectorizer.
+    :param labels: The labels.
+    :param n_features: The number of features.
+    :param ts_feature: A list containing feature thresholds.
+    :param ts_sample: A list contatining sample thresholds.
+    :param fs_ts: A list Fusion similarity threshold.
+    :return: None
+    """
+
+    for i in range(len(ts_feature)):
+        for j in range(len(ts_sample)):
+            for k in range(len(fs_ts)):
+                sample_vec, feature_vec = isa(
+                    data,
+                    n_initial=1000,
+                    n_updates=20,
+                    thresh_feature=ts_feature[i],
+                    thresh_sample=ts_sample[j],
+                    fusion_similarity_threshold=fs_ts[k],
+                )
+                name = os.path.join(
+                    "ISA", f"f-{ts_feature[i]} s-{ts_sample[j]} fs-{fs_ts[k]}"
+                )
+                display(
+                    sample_vec, feature_vec, name, vectorizer, data, labels, n_features
+                )
 
 
 def main() -> None:
@@ -395,6 +460,12 @@ def main() -> None:
         f"{true_k} Categories | {n_samples} Samples | {n_features} Features | Vectorization done in "
         f"{vectorization_time:.3f} s"
     )
+
+    count = Counter(labels).items()
+    count = map(lambda x: (int(x[0]), x[1]), count)
+    print(f"Number of data points in each category: \n{sorted(count)}\n")
+    print(f"Name of each category:\n{dataset.target_names}\n")
+
     # Save dataset statistics.
     with open(os.path.join("Results", f"Dataset.csv"), "w") as file:
         file.write(
@@ -410,17 +481,29 @@ def main() -> None:
     plt.xlabel("Features")
     # Perform ISA.
     t0 = time()
-    sample_vec, feature_vec = isa(
-        data,
-        n_initial=2000,
-        n_updates=20,
-        thresh_feature=1.6,
-        thresh_sample=1.1,
-        fusion_similarity_threshold=0.7,
-    )
+    # sample_vec, feature_vec = isa(
+    #     data,
+    #     n_initial=2000,
+    #     n_updates=20,
+    #     thresh_feature=1.6,
+    #     thresh_sample=1.1,
+    #     fusion_similarity_threshold=0.7,
+    # )
     isa_time = time() - t0
     print(f"ISA done in {isa_time:.3f} s")
-    display(sample_vec, feature_vec, "ISA", vectorizer, data, labels, n_features)
+    # display(sample_vec, feature_vec, "ISA", vectorizer, data, labels, n_features)
+
+    # Test hyperparameters for ISA
+
+    ISA_hyperparameter_test(
+        data=data,
+        vectorizer=vectorizer,
+        n_features=n_features,
+        labels=labels,
+        ts_feature=[0.5, 0.8, 1],
+        ts_sample=[0.9, 1.5, 1.8, 2.2],
+        fs_ts=[0.6],
+    )
 
     # Perform K-Means.
     kmeans = KMeans(n_clusters=true_k, random_state=random_state)
