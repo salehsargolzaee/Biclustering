@@ -197,10 +197,8 @@ def isa(
         for i in range(n_updates):
             sample_vector = f(r_data.dot(feature_vector), t_sample=thresh_sample)
             feature_vector = f(c_data.T.dot(sample_vector), t_feature=thresh_feature)
-
         if sum(sample_vector != 0) < 2 or sum(feature_vector != 0) < 2:
             continue
-
         all_feature_vectors.append(feature_vector)
         all_sample_vectors.append(sample_vector)
     all_feature_vectors = np.array(all_feature_vectors)
@@ -241,13 +239,10 @@ def manifold(
         samples = sorted(list(sample_vec[i]))
         solution.extend(data[samples, :][:, all_features])
         cluster_labels.extend([i + 1] * len(sample_vec[i]))
-
     if len(solution) <= 1:
         return
-
     solution = np.array(solution)
     solution = row_normalization(solution)
-
     if manifold_learner == "tsne":
         tsne = TSNE(
             n_components=2,
@@ -285,7 +280,6 @@ def display(
     :return: Nothing.
     """
     os.makedirs(os.path.join("Results", name), exist_ok=True)
-
     display_fused_modules(
         fused_features=feature_vec,
         fused_samples=sample_vec,
@@ -293,7 +287,6 @@ def display(
         sample_labels=labels,
         name=name,
     )
-
     words = vectorizer.get_feature_names_out()
     # Get all samples and features.
     upper = min(len(sample_vec), len(feature_vec))
@@ -312,7 +305,7 @@ def display(
         reordered_data = bicluster[row_order, :][:, col_order]
         fig = plt.figure(figsize=(25, 8), dpi=200)
         sns.heatmap(reordered_data, cmap="viridis", annot=False)
-        title = f"{name if "/" not in name else ""} Bicluster {ind + 1} Heatmap"
+        title = f"{os.path.basename(name)} Bicluster {ind + 1} Heatmap"
         plt.title(title)
         plt.xlabel("Terms")
         plt.ylabel("Documents")
@@ -333,7 +326,7 @@ def display(
         fig = plt.figure(figsize=(10, 6))
         plt.imshow(wc, interpolation="bilinear")
         plt.axis("off")
-        title = f"{name if "/" not in name else ""} Word Cloud for Bicluster {ind + 1}"
+        title = f"{os.path.basename(name)} Word Cloud for Bicluster {ind + 1}"
         plt.title(title)
         fig.savefig(os.path.join("Results", name, f"{title}.png"))
         plt.close(fig)
@@ -341,21 +334,21 @@ def display(
         sample_vec,
         feature_vec,
         data,
-        f"{name if "/" not in name else ""} t_sne of solution",
+        f"{os.path.basename(name)} t_sne of solution",
         name,
     )
     manifold(
         [np.where(labels == label)[0] for label in np.unique(labels)],
         np.array([np.arange(n_features) for _ in labels]),
         data,
-        f"{name if "/" not in name else ""} t_sne of the original data",
+        f"{os.path.basename(name)} t_sne of the original data",
         name,
     )
     manifold(
         sample_vec,
         feature_vec,
         data,
-        f"{name if "/" not in name else ""} u_map of biclustering solution",
+        f"{os.path.basename(name)} u_map of biclustering solution",
         name,
         manifold_learner="umap",
     )
@@ -363,13 +356,13 @@ def display(
         [np.where(labels == label)[0] for label in np.unique(labels)],
         np.array([np.arange(n_features) for _ in labels]),
         data,
-        f"{name if "/" not in name else ""} u_map of original data",
+        f"{os.path.basename(name)} u_map of original data",
         name,
         manifold_learner="umap",
     )
 
 
-def ISA_hyperparameter_test(
+def isa_hyperparameter_test(
     data: np.array,
     vectorizer,
     labels,
@@ -377,7 +370,7 @@ def ISA_hyperparameter_test(
     ts_feature: List[float] = [0.0],
     ts_sample: List[float] = [0.0],
     fs_ts: List[float] = [0.7],
-) -> None:
+) -> float:
     """
     Perform ISA using different hyperparameters.
     :param data: The data.
@@ -387,12 +380,14 @@ def ISA_hyperparameter_test(
     :param ts_feature: A list containing feature thresholds.
     :param ts_sample: A list contatining sample thresholds.
     :param fs_ts: A list Fusion similarity threshold.
-    :return: None
+    :return: The average ISA time.
     """
-
+    total_time = 0
+    attempts = 0
     for i in range(len(ts_feature)):
         for j in range(len(ts_sample)):
             for k in range(len(fs_ts)):
+                t0 = time()
                 sample_vec, feature_vec = isa(
                     data,
                     n_initial=1000,
@@ -401,12 +396,16 @@ def ISA_hyperparameter_test(
                     thresh_sample=ts_sample[j],
                     fusion_similarity_threshold=fs_ts[k],
                 )
+                isa_time = time() - t0
+                total_time += isa_time
+                attempts += 1
                 name = os.path.join(
                     "ISA", f"f-{ts_feature[i]} s-{ts_sample[j]} fs-{fs_ts[k]}"
                 )
                 display(
                     sample_vec, feature_vec, name, vectorizer, data, labels, n_features
                 )
+    return total_time / attempts
 
 
 def main() -> None:
@@ -460,12 +459,10 @@ def main() -> None:
         f"{true_k} Categories | {n_samples} Samples | {n_features} Features | Vectorization done in "
         f"{vectorization_time:.3f} s"
     )
-
     count = Counter(labels).items()
     count = map(lambda x: (int(x[0]), x[1]), count)
     print(f"Number of data points in each category: \n{sorted(count)}\n")
     print(f"Name of each category:\n{dataset.target_names}\n")
-
     # Save dataset statistics.
     with open(os.path.join("Results", f"Dataset.csv"), "w") as file:
         file.write(
@@ -480,22 +477,8 @@ def main() -> None:
     plt.ylabel("Documents")
     plt.xlabel("Features")
     # Perform ISA.
-    t0 = time()
-    # sample_vec, feature_vec = isa(
-    #     data,
-    #     n_initial=2000,
-    #     n_updates=20,
-    #     thresh_feature=1.6,
-    #     thresh_sample=1.1,
-    #     fusion_similarity_threshold=0.7,
-    # )
-    isa_time = time() - t0
-    print(f"ISA done in {isa_time:.3f} s")
-    # display(sample_vec, feature_vec, "ISA", vectorizer, data, labels, n_features)
-
-    # Test hyperparameters for ISA
-
-    ISA_hyperparameter_test(
+    # Test hyperparameters for ISA.
+    isa_time = isa_hyperparameter_test(
         data=data,
         vectorizer=vectorizer,
         n_features=n_features,
@@ -504,7 +487,7 @@ def main() -> None:
         ts_sample=[0.9, 1.5, 1.8, 2.2],
         fs_ts=[0.6],
     )
-
+    print(f"ISA done on average in {isa_time:.3f} s")
     # Perform K-Means.
     kmeans = KMeans(n_clusters=true_k, random_state=random_state)
     t0 = time()
