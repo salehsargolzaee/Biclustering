@@ -16,6 +16,7 @@ from sklearn.datasets import fetch_20newsgroups
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.manifold import TSNE
 from wordcloud import WordCloud
+from evaluation import evaluate_algorithms
 
 
 def row_normalization(data: np.array) -> np.array:
@@ -390,7 +391,7 @@ def isa_hyperparameter_test(
                 t0 = time()
                 sample_vec, feature_vec = isa(
                     data,
-                    n_initial=1000,
+                    n_initial=300,
                     n_updates=20,
                     thresh_feature=ts_feature[i],
                     thresh_sample=ts_sample[j],
@@ -478,17 +479,37 @@ def main() -> None:
     plt.xlabel("Features")
     # Perform ISA.
     # Test hyperparameters for ISA.
+    # isa_time = isa_hyperparameter_test(
+    #     data=data,
+    #     vectorizer=vectorizer,
+    #     n_features=n_features,
+    #     labels=labels,
+    #     ts_feature=[0.5, 0.8, 1],
+    #     ts_sample=[0.9, 1.5, 1.8, 2.2],
+    #     fs_ts=[0.6],
+    # )
     isa_time = isa_hyperparameter_test(
         data=data,
         vectorizer=vectorizer,
         n_features=n_features,
         labels=labels,
-        ts_feature=[0.5, 0.8, 1],
-        ts_sample=[0.9, 1.5, 1.8, 2.2],
+        ts_feature=[1.6],
+        ts_sample=[1.5],
         fs_ts=[0.6],
     )
     print(f"ISA done on average in {isa_time:.3f} s")
+
+    sample_vec, feature_vec = isa(
+        data,
+        n_initial=600,
+        n_updates=20,
+        thresh_feature=1.6,
+        thresh_sample=1.1,
+        fusion_similarity_threshold=0.6,
+    )
+    sample_vec_isa, feature_vec_isa = sample_vec, feature_vec
     # Perform K-Means.
+    true_k = 2
     kmeans = KMeans(n_clusters=true_k, random_state=random_state)
     t0 = time()
     kmeans.fit(data)
@@ -507,6 +528,8 @@ def main() -> None:
         top_feature_indices = np.argsort(centroid)[-n_top_features:]
         feature_vec.append(set(top_feature_indices))
     display(sample_vec, feature_vec, "K-Means", vectorizer, data, labels, n_features)
+
+    sample_vec_kmeans, feature_vec_kmeans = sample_vec, feature_vec
     # Perform spectral clustering.
     spectral = SpectralClustering(
         n_clusters=true_k, random_state=random_state, affinity="nearest_neighbors"
@@ -531,6 +554,7 @@ def main() -> None:
         feature_vec.append(set(top_feature_indices))
     # Display results for Spectral Clustering.
     display(sample_vec, feature_vec, "Spectral", vectorizer, data, labels, n_features)
+    sample_vec_spectral, feature_vec_spectral = sample_vec, feature_vec
     # Save computation times statistics.
     with open(os.path.join("Results", f"Times.csv"), "w") as file:
         file.write(
@@ -540,6 +564,17 @@ def main() -> None:
             f"K-Means,{kmeans_time:.3f}\n"
             f"Spectral,{spectral_time:.3f}"
         )
+
+    evaluate_algorithms(
+        data,
+        labels,
+        sample_vec_isa,
+        feature_vec_isa,
+        sample_vec_kmeans,
+        feature_vec_kmeans,
+        sample_vec_spectral,
+        feature_vec_spectral,
+    )
 
 
 if __name__ == "__main__":
