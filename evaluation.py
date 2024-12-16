@@ -1,72 +1,4 @@
 import numpy as np
-from sklearn.metrics import homogeneity_score
-
-
-def map_labels(original_labels):
-    """
-    Map original labels to merged classes:
-    {0,4,5} -> 0 (religion)
-    {1,3}   -> 1 (science)
-    {2}     -> 2 (hockey)
-    """
-    mapped = []
-    for y in original_labels:
-        if y in {0, 4, 5}:
-            mapped.append(0)  # religion
-        elif y in {1, 3}:
-            mapped.append(1)  # science
-        else:
-            mapped.append(2)  # hockey
-    return np.array(mapped)
-
-
-def sample_vec_to_labels(data, sample_vec, feature_vec, n_samples, labels_true):
-    """
-    Assign samples to clusters based on the bicluster with the highest feature sum.
-
-    :param data: 2D numpy array of shape (n_samples, n_features)
-    :param sample_vec: A list of sets, where each set contains the indices of samples in that bicluster.
-    :param feature_vec: A list of sets, where each set contains the indices of features in that bicluster.
-    :param n_samples: Total number of samples.
-    :return: labels_pred: 1D numpy array with the cluster assignments for each sample.
-    """
-    labels_pred = np.full(n_samples, -1, dtype=int)
-
-    # For each sample, determine which bicluster it belongs to most strongly.
-    for i in range(n_samples):
-        best_bicluster = -1
-        best_sum = -np.inf
-
-        # Check every bicluster to see if sample i is included.
-        for bc_id, samples_set in enumerate(sample_vec):
-            if i in samples_set:
-                # Compute the sum of data[i, features_of_this_bicluster]
-                # Convert feature_set to a list for indexing
-                features_list = list(feature_vec[bc_id])
-                current_sum = np.sum(data[i, features_list])
-
-                # If this sum is greater than any found so far, update best choice.
-                if current_sum > best_sum:
-                    best_sum = current_sum
-                    best_bicluster = bc_id
-
-        # Assign the sample to the best bicluster found (if any)
-        if best_bicluster != -1:
-            labels_pred[i] = best_bicluster
-
-    # If any samples are not assigned to any bicluster, assign them to a new cluster or leave them as is.
-    # Here, we create a dummy cluster for unassigned samples:
-    unassigned = labels_pred == -1
-
-    temp_labels_pred, temp_labels_true = [], []
-
-    for i in range(n_samples):
-        if i in unassigned:
-            continue
-        temp_labels_pred.append(labels_pred[i])
-        temp_labels_true.append(labels_true[i])
-
-    return np.array(temp_labels_pred), np.array(temp_labels_true)
 
 
 def onmi_score(labels_true, sample_vec, n_true_clusters):
@@ -134,53 +66,44 @@ def onmi_score(labels_true, sample_vec, n_true_clusters):
 
 
 def evaluate_algorithms(
-    data,
     labels,
     sample_vec_isa,
-    feature_vec_isa,
-    sample_vec_kmeans,
-    feature_vec_kmeans,
-    sample_vec_spectral,
-    feature_vec_spectral,
+    sample_vec_kmeans=None,
+    sample_vec_spectral=None,
+    just_isa=False,
 ):
     """
-    Evaluate ISA, K-Means, and Spectral results using ONMI and Homogeneity.
+    Evaluate ISA, K-Means, and Spectral results using ONMI
     """
     # Map labels to merged classes (note that you should hard-code mapped classes)
-    mapped_labels = map_labels(labels)
-    n_true_clusters = len(np.unique(mapped_labels))
+    n_true_clusters = len(np.unique(labels))
 
     # ISA evaluation
-    isa_single_labels, mapped_labels_isa = sample_vec_to_labels(
-        data, sample_vec_isa, feature_vec_isa, len(labels), mapped_labels
-    )
-    isa_homogeneity = homogeneity_score(mapped_labels_isa, isa_single_labels)
-    isa_onmi = onmi_score(mapped_labels, sample_vec_isa, n_true_clusters)
+    isa_onmi = onmi_score(labels, sample_vec_isa, n_true_clusters)
+
+    if just_isa:
+        return isa_onmi
+
+    results = "Method,ONMI\n"
+    results += f"ISA,{isa_onmi:.3f}\n"
 
     print("ISA Results:")
-    print(f"Homogeneity: {isa_homogeneity:.3f}")
     print(f"ONMI: {isa_onmi:.3f}\n")
 
     # K-Means evaluation
-    kmeans_single_labels, mapped_labels_kmeans = sample_vec_to_labels(
-        data, sample_vec_kmeans, feature_vec_kmeans, len(labels), mapped_labels
-    )
-    kmeans_homogeneity = homogeneity_score(mapped_labels_kmeans, kmeans_single_labels)
-    kmeans_onmi = onmi_score(mapped_labels, sample_vec_kmeans, n_true_clusters)
 
+    kmeans_onmi = onmi_score(labels, sample_vec_kmeans, n_true_clusters)
+
+    results += f"K-Means,{kmeans_onmi:.3f}\n"
     print("K-Means Results:")
-    print(f"Homogeneity: {kmeans_homogeneity:.3f}")
     print(f"ONMI: {kmeans_onmi:.3f}\n")
 
     # Spectral evaluation
-    spectral_single_labels, mapped_labels_spectral = sample_vec_to_labels(
-        data, sample_vec_spectral, feature_vec_spectral, len(labels), mapped_labels
-    )
-    spectral_homogeneity = homogeneity_score(
-        mapped_labels_spectral, spectral_single_labels
-    )
-    spectral_onmi = onmi_score(mapped_labels, sample_vec_spectral, n_true_clusters)
+    spectral_onmi = onmi_score(labels, sample_vec_spectral, n_true_clusters)
 
+    results += f"Spectral,{spectral_onmi:.3f}"
     print("Spectral Results:")
-    print(f"Homogeneity: {spectral_homogeneity:.3f}")
     print(f"ONMI: {spectral_onmi:.3f}\n")
+
+    with open("./Results/metrics.csv", "w") as f:
+        f.write(results)

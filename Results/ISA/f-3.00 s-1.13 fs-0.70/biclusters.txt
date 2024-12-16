@@ -1,0 +1,55 @@
+ISA/f-3.00 s-1.13 fs-0.70 Fused Module 1:
+Features: ['reply', 'acts', 'mr', 'death', 'died', 'matthew', 'passage', 'passages', 'fall', 'field', 'went', 'act', 'greek', 'open', 'blood', '27', 'tony', 'explanation', 'result', 'successful', 'silver', 'pieces', 'possibility', 'luke', 'conclude', 'type', 'interpreted']
+Samples_indices: [65, 226, 235, 78, 154, 124]
+Samples_labels: [4, 4, 4, 5, 0, 5]
+
+ISA/f-3.00 s-1.13 fs-0.70 Fused Module 2:
+Features: ['space', 'dc', 'nasa', 'sdio', 'rocket', 'dr', 'rockets', 'flight', 'technology', 'vehicle', 'allen', 'funds', 'fund', 'station', 'support', 'agency', 'critical', 'president', 'public', 'orbital', 'ssrt', 'feet', 'alive', 'ssto', 'university', 'tests', 'committee', 'paying', 'government', 'june', 'development', 'aircraft', 'officials', 'rocketry', 'spending', 'stage', 'members', 'named', 'open', 'national', 'white', 'single', 'budget', 'mr', 'charles', 'engine', 'approach', 'bring', 'unmanned', 'repeat', 'include', 'studies', 'california', 'ready', 'cover', 'press', 'weeks', 'town', 'effort', 'signal', 'release', 'options', 'geology', 'build', 'required', 'delta', 'altitude', 'demonstrate', 'senior', 'ed', 'developed', 'sciences', 'distributed', 'college', 'william', 'vehicles', 'capability', 'submit', 'requirements', 'leader', 'foundation', 'demands']
+Samples_indices: [199, 14, 270, 85, 284, 157, 159, 35, 228, 101, 243, 55]
+Samples_labels: [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3]
+
+ISA/f-3.00 s-1.13 fs-0.70 Fused Module 3:
+Features: ['god', 'jesus', 'christian', 'life', 'people', 'believe', 'christ', 'faith', 'christians', 'bible', 'sin', 'truth', 'christianity', 'time', 'world', 'lord', 'things', 'father', 'cross', 'message', 'reason', 'eternal', 'saint', 'john', 'death', 'son', 'means', 'live', 'master', 'absolute', 'book', '16', 'living', 'kingdom', 'unto', 'arrogant', 'holy', 'certainty', 'physical', 'work', 'died', 'revelation', 'soul', '11', 'baptism', '19', 'divine', 'scripture', 'king', '17', 'blessed', 'doctrines', 'paul', 'presented', 'pass', 'bread', 'luke', 'art', '13', 'suffering', 'hearts', 'sent', 'return', 'born', 'description', 'followers', 'michael', 'sins', 'appears', 'nicely', 'helpful', 'distinction', 'hatred', 'sound', 'began', 'process', 'foolish', '22', 'broke', 'teachings', 'passing', 'revealed', 'accepted', 'touch', 'immense', 'parts', 'heres', 'prayer', 'stopped', 'senses', 'escape', 'possibility', 'despite', 'circumstances', 'hearing']
+Samples_indices: [2, 261, 267, 140, 17, 19, 278, 152, 283, 288, 33, 291, 164, 38, 168, 44, 46, 175, 176, 48, 50, 178, 53, 58, 62, 65, 193, 69, 202, 76, 78, 82, 87, 93, 222, 97, 226, 233, 123, 235, 238, 242, 120, 251, 252]
+Samples_labels: [0, 5, 4, 4, 4, 4, 4, 3, 4, 0, 0, 2, 4, 5, 0, 4, 4, 4, 0, 0, 4, 4, 4, 4, 4, 4, 4, 5, 4, 5, 5, 4, 4, 5, 4, 4, 4, 4, 4, 4, 4, 4, 4, 3, 0]
+
+ISA/f-3.00 s-1.13 fs-0.70 Fused Module 4:
+Features: ['points', 'computer', 'point', 'current', 'using', 'title', 'author', 'david', 'reference', 'energy', 'consider', 'journal', 'edge', 'vision', 'pages', 'analysis', 'positions', 'month', 'allow', 'method', 'papers', 'relevant', 'december', '87', 'described', 'washington', 'vector', 'locally', 'goals', 'determined', 'calculations', 'changes', '29', 'close', 'individual']
+Samples_indices: [256, 258, 35, 287, 106, 142, 241, 25, 253, 223]
+Samples_labels: [1, 1, 3, 3, 1, 1, 4, 3, 1, 1]
+
+ISA/f-3.00 s-1.13 fs-0.70 Fused Module 5:
+Features: ['pollution', 'sky', 'light', 'humans', 'night', 'flight', 'aircraft', 'imagine', 'live', 'miles', 'getting', 'ground', 'place', 'air', 'activities', 'perfect', 'stars', 'involved', 'altitude', 'path', 'gets', 'commercial', 'reach', 'beauty', 'hundreds', 'pure', '25', 'desire', 'modern', 'quickly', 'east', 'nature', 'practical', 'modified', 'connection', 'achieved', 'main', 'virgin', 'professional', 'passage', 'complaining', 'acceptable', 'levels', 'sight', 'concerning', 'age', '80', 'changed']
+Samples_indices: [35, 101, 140, 14, 114, 243, 149, 157, 88, 152]
+Samples_labels: [3, 3, 4, 3, 3, 3, 3, 3, 3, 3]
+
+ISA/f-3.00 s-1.13 fs-0.70 Fused Module 6:
+Features: ['divine', 'master', 'soul', 'world', 'physical', 'including', 'followers', '13', 'christians', 'sound', '22', 'living', 'identify', 'religions', 'major', 'current', 'books', 'hearing', 'levels', 'alive', 'higher', 'continue', 'strong', 'waiting', 'upper', 'totally', 'revelation', 'usually', 'studying', 'secondly', 'member', 'founded', 'baptist', 'achieved', 'unique', '2000', 'describes']
+Samples_indices: [226, 38, 206, 82, 24, 218]
+Samples_labels: [4, 5, 1, 4, 3, 4]
+
+ISA/f-3.00 s-1.13 fs-0.70 Fused Module 7:
+Features: ['god', 'jesus', 'sin', 'lord', 'mary', 'christ', 'father', 'saint', 'death', 'day', 'died', 'holy', 'son', 'mother', 'house', 'asked', 'baptism', 'gave', 'blessed', 'later', 'went', 'changed', 'share', 'art', 'children', 'husband', 'suffering', 'woman', 'sent', 'finally', 'midst', 'forgive', 'st', 'began', 'baby', 'foolish', 'broke', 'ran', 'receive', 'touch', 'immense', 'wish', 'room', 'heres', 'prayer', 'parents', 'senses', 'virgin', 'born', 'committed', 'lived', 'commit', 'arrived', 'arthur', 'lady', 'delivered', 'remained', 'guilty']
+Samples_indices: [65, 261, 202, 267, 78, 82, 87, 226, 230, 233, 235, 50, 178, 120, 58, 123]
+Samples_labels: [4, 5, 4, 4, 5, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4]
+
+ISA/f-3.00 s-1.13 fs-0.70 Fused Module 8:
+Features: ['space', 'light', 'pollution', 'sky', 'billboard', 'technology', 'orbit', 'available', 'dark', 'launch', 'wants', 'station', 'head', 'funding', 'atlanta', 'visible', '10', 'inflatable', 'worse', 'imagine', 'positive', 'development', 'spacecraft', 'impact', 'area', 'vehicle', 'texas', 'aspects', '15', 'sensors', 'legal', 'layer', 'potential', 'concept', 'costs', 'specific', 'responsible', 'release', 'summer', 'structure', 'additional', 'type', 'raise', 'identify', 'frame', 'enter', 'claiming', 'advantage']
+Samples_indices: [14, 270, 85, 149, 88, 152, 157, 287, 35, 295, 41, 49, 114, 243]
+Samples_labels: [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3]
+
+ISA/f-3.00 s-1.13 fs-0.70 Fused Module 9:
+Features: ['life', 'jesus', 'world', 'john', 'divine', 'master', '16', 'eternal', 'physical', 'including', 'book', 'living', 'soul', 'followers', 'christians', '13', 'means', 'luke', 'sound', 'continue', '17', 'books', 'identify', 'religions', 'major', 'current', 'hearing', 'upper', 'levels', 'higher', 'baptist', '2000', 'waiting', 'studying', 'founded', 'achieved']
+Samples_indices: [69, 202, 140, 82, 24, 218, 226, 38, 178, 120, 185, 58, 251, 62]
+Samples_labels: [5, 4, 4, 4, 3, 4, 4, 5, 4, 4, 4, 4, 3, 4]
+
+ISA/f-3.00 s-1.13 fs-0.70 Fused Module 10:
+Features: ['moon', 'com', 'esa', 'lunar', 'apple', 'mission', '13', '10', 'billion', '93', 'apr', 'cost', '22', 'year', '21', 'titan', '20', '15', 'practical', 'surface', 'joint', 'shuttle', '25', 'equipment', 'carry', 'flight', 'stage', 'direct', 'total', 'compact', 'plan', 'st', 'unmanned', 'ralph', 'goals', 'cheaper', 'upper', 'hmmm', 'article', 'wrote', 'share', 'return']
+Samples_indices: [260, 12, 15, 82, 24, 152, 35, 297, 42, 105, 174]
+Samples_labels: [3, 3, 3, 4, 3, 3, 3, 3, 3, 3, 3]
+
+ISA/f-3.00 s-1.13 fs-0.70 Fused Module 11:
+Features: ['sky', 'light', 'dark', 'billboard', 'pollution', 'wants', 'majority', 'cause', 'typical', 'ridiculous', 'imagine', 'positive', 'matter', 'party', 'observing', 'problem', 'venus', 'texas', 'rights', 'star', 'opinions', 'george', 'guess', 'ago', 'run', 'set']
+Samples_indices: [98, 114, 243, 88, 152]
+Samples_labels: [0, 3, 3, 3, 3]
+

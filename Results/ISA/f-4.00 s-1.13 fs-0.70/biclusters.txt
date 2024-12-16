@@ -1,0 +1,80 @@
+ISA/f-4.00 s-1.13 fs-0.70 Fused Module 1:
+Features: ['dc', 'sdio', 'rocket', 'rockets', 'flight', 'technology', 'vehicle', 'allen', 'funds', 'fund', 'support', 'critical', 'public', 'orbital', 'ssrt', 'feet', 'ssto', 'tests', 'government', 'development', 'aircraft', 'rocketry', 'spending', 'stage', 'open', 'white', 'single', 'agency', 'budget', 'charles', 'engine', 'approach', 'unmanned', 'repeat', 'studies', 'ready', 'cover', 'weeks', 'build', 'altitude', 'demonstrate']
+Samples_indices: [35, 101, 199, 270, 14, 243, 55, 284, 157, 159]
+Samples_labels: [3, 3, 3, 3, 3, 3, 3, 3, 3, 3]
+
+ISA/f-4.00 s-1.13 fs-0.70 Fused Module 2:
+Features: ['reply', 'acts', 'mr', 'death', 'died', 'matthew', 'passage', 'passages', 'fall', 'field', 'act', 'greek', 'blood', '27', 'tony', 'successful', 'pieces', 'possibility', 'luke', 'conclude', 'type']
+Samples_indices: [65, 226, 235, 78, 154, 124]
+Samples_labels: [4, 4, 4, 5, 0, 5]
+
+ISA/f-4.00 s-1.13 fs-0.70 Fused Module 3:
+Features: ['sky', 'pollution', 'light', 'humans', 'night', 'aircraft', 'miles', 'ground', 'involved', 'altitude', 'path', 'gets', 'air', 'beauty', 'pure', 'desire', 'hundreds', 'virgin', 'professional', 'modified', 'connection', 'complaining', 'achieved', 'levels', 'main', 'age', '80']
+Samples_indices: [101, 140, 114, 243, 149, 152, 88, 157]
+Samples_labels: [3, 4, 3, 3, 3, 3, 3, 3]
+
+ISA/f-4.00 s-1.13 fs-0.70 Fused Module 4:
+Features: ['soul', 'divine', 'master', 'sound', 'world', 'physical', 'including', 'followers', 'books', 'living', 'religions', 'hearing', 'levels', 'upper', 'studying', 'founded']
+Samples_indices: [226, 4, 38, 206, 82, 120, 24, 218]
+Samples_labels: [4, 0, 5, 1, 4, 4, 3, 4]
+
+ISA/f-4.00 s-1.13 fs-0.70 Fused Module 5:
+Features: ['god', 'christ', 'lord', 'cross', 'son', 'work', 'live', 'died', 'circumstances', 'michael', 'nicely', 'helpful', 'return', 'sins', 'broke', 'revealed', 'parts', 'despite', 'stopped', 'description', 'process']
+Samples_indices: [65, 267, 82, 19, 278, 87, 33, 226, 291, 164, 235, 44, 46, 176, 50, 178, 52, 120]
+Samples_labels: [4, 4, 4, 4, 4, 4, 0, 4, 2, 4, 4, 4, 4, 0, 4, 4, 4, 4]
+
+ISA/f-4.00 s-1.13 fs-0.70 Fused Module 6:
+Features: ['sin', 'baby', 'holy', 'children', 'house', 'blessed', 'died', 'finally', 'went', 'midst', 'forgive', 'st', 'immense', 'wish', 'committed', 'lived', 'receive', 'commit', 'arrived', 'changed', 'touch', 'senses', 'heres', 'arthur', 'lady', 'born', 'remained', 'guilty', 'delivered']
+Samples_indices: [160, 65, 261, 237, 78, 50, 87, 120, 123]
+Samples_labels: [5, 4, 5, 3, 5, 4, 4, 4, 4]
+
+ISA/f-4.00 s-1.13 fs-0.70 Fused Module 7:
+Features: ['cause', 'sky', 'light', 'dark', 'billboard', 'pollution', 'wants', 'majority', 'typical', 'ridiculous', 'imagine', 'positive', 'party', 'observing', 'texas', 'rights', 'star', 'opinions', 'george', 'ago', 'set']
+Samples_indices: [98, 114, 243, 88, 152, 255]
+Samples_labels: [0, 3, 3, 3, 3, 0]
+
+ISA/f-4.00 s-1.13 fs-0.70 Fused Module 8:
+Features: ['dr', 'technology', 'nasa', 'president', 'station', 'committee', 'university', 'government', 'named', 'mr', 'charles', 'national', 'press', 'members', 'release', 'options', 'geology', 'ed', 'distributed', 'william', 'submit', 'requirements', 'foundation', 'demands']
+Samples_indices: [35, 270, 243, 157]
+Samples_labels: [3, 3, 3, 3]
+
+ISA/f-4.00 s-1.13 fs-0.70 Fused Module 9:
+Features: ['space', 'nasa', 'launch', 'dr', 'technology', 'station', 'president', 'committee', 'selected', 'government', 'named', 'charles', 'national', 'release', 'options', 'geology', 'ed', 'distributed', 'submit']
+Samples_indices: [198, 265, 14, 270, 85, 213, 284, 157, 35, 228, 293, 295, 170, 237, 49, 243, 253]
+Samples_labels: [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 1]
+
+ISA/f-4.00 s-1.13 fs-0.70 Fused Module 10:
+Features: ['space', 'launch', 'pollution', 'billboard', 'light', 'technology', 'station', 'inflatable', 'development']
+Samples_indices: [198, 265, 14, 270, 149, 85, 213, 88, 157, 35, 228, 293, 295, 41, 170, 45, 237, 49, 114, 115, 243, 253]
+Samples_labels: [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 1]
+
+ISA/f-4.00 s-1.13 fs-0.70 Fused Module 11:
+Features: ['christian', 'christianity', 'humans', 'animals', 'purpose', 'hope', 'standards', 'moral', 'aspect', 'disagree', 'facilities', 'structure', 'planet', 'gain', 'content', 'wide', 'structures', 'preach', 'loss', 'limited', 'interpreted', 'guilty', 'advantage', 'demonstrate', '2000']
+Samples_indices: [160, 261, 233, 140, 148, 278, 88, 93, 222]
+Samples_labels: [5, 5, 4, 4, 0, 4, 3, 5, 4]
+
+ISA/f-4.00 s-1.13 fs-0.70 Fused Module 12:
+Features: ['mary', 'sin', 'lord', 'christ', 'holy', 'catholic', 'blessed', 'baptism', 'art', 'woman', 'perfect', 'parents', 'virgin', 'adam', 'title', 'born', 'natural', 'lady', 'remains', 'originally', 'bearing', '430']
+Samples_indices: [65, 261, 235, 267, 237, 299, 82, 87, 120]
+Samples_labels: [4, 5, 4, 4, 3, 3, 4, 4, 4]
+
+ISA/f-4.00 s-1.13 fs-0.70 Fused Module 13:
+Features: ['sdio', 'dc', 'mr', 'reply', 'acts', 'death', 'open', 'matthew', 'tests', 'ssto', 'passage', 'died', 'passages', 'orbital', 'fall', 'government', 'act', 'greek', 'approach', 'field', 'studies', '27', 'tony', 'successful', 'pieces', 'possibility']
+Samples_indices: [226, 235, 78, 270, 55, 154, 124, 157, 159]
+Samples_labels: [4, 4, 5, 3, 3, 0, 5, 3, 3]
+
+ISA/f-4.00 s-1.13 fs-0.70 Fused Module 14:
+Features: ['truth', 'christians', 'absolute', 'arrogant', 'lord', 'certainty', 'reason', 'scripture', 'baptism', 'revelation', 'doctrines', 'accepted', 'distinction', 'teachings', 'bread', 'appears', 'witnessing', 'possibility']
+Samples_indices: [97, 168, 267, 238, 82, 53, 120, 187, 222]
+Samples_labels: [4, 0, 4, 4, 4, 4, 4, 0, 4]
+
+ISA/f-4.00 s-1.13 fs-0.70 Fused Module 15:
+Features: ['space', 'astronaut', 'future', 'mention', 'wonder', 'present', 'idea', 'interesting', 'help', 'make']
+Samples_indices: [35, 228, 293, 295, 265, 270, 49, 179, 243, 85, 253, 287]
+Samples_labels: [3, 3, 3, 3, 3, 3, 3, 2, 3, 3, 1, 3]
+
+ISA/f-4.00 s-1.13 fs-0.70 Fused Module 16:
+Features: ['billboard', 'light', 'pollution', '10', 'funding', 'atlanta', '15', 'inflatable', 'vehicle', 'launch', 'positive', 'development', 'impact', 'sensors', 'legal', 'layer', 'concept', 'frame', 'claiming', 'costs', 'specific', 'responsible', 'summer', 'structure', 'additional', 'type', 'identify', 'advantage', 'release']
+Samples_indices: [35, 41, 106, 12, 14, 114, 243, 157, 88, 152, 287]
+Samples_labels: [3, 3, 1, 3, 3, 3, 3, 3, 3, 3, 3]
+

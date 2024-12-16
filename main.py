@@ -94,8 +94,10 @@ def fuse_fixed_points_vectors(
         feature_sim = jaccard_similarity(feature_sets[i], feature_sets[j])
         sample_sim = jaccard_similarity(sample_sets[i], sample_sets[j])
         # Define overall similarity as the average of feature and sample similarity.
-        overall_sim = (feature_sim + sample_sim) / 2
-        if overall_sim >= similarity_threshold:
+        # overall_sim = (feature_sim + sample_sim) / 2
+        # if overall_sim >= similarity_threshold:
+        #     g.add_edge(i, j)
+        if feature_sim >= similarity_threshold or sample_sim >= similarity_threshold:
             g.add_edge(i, j)
     # Find connected components (clusters of similar fixed points).
     clusters = list(nx.connected_components(g))
@@ -118,7 +120,8 @@ def display_fused_modules(
     feature_labels: List[str],
     sample_labels: List[str],
     name: str,
-) -> None:
+    data,
+) -> int:
     """
     Display the fused modules with feature and sample labels.
     :param fused_features: List of sets containing feature indices.
@@ -126,19 +129,29 @@ def display_fused_modules(
     :param feature_labels: List mapping feature indices to feature names.
     :param sample_labels: List mapping sample indices to sample names.
     :param name: Model name.
-    :return: Nothing.
+    :return: Number of unique samples belonging to bicluster.
     """
     results = ""
+    unique_samples = set()
     for i, (features, samples) in enumerate(zip(fused_features, fused_samples), 1):
-        feature_names = [feature_labels[idx] for idx in features]
+        unique_samples.update(samples)
+        samples = list(map(lambda x: int(x), samples))
+        bicluster_terms = [
+            (np.mean(data[samples, :][:, word_ind]), feature_labels[word_ind])
+            for word_ind in features
+        ]
+        feature_names = list(map(lambda x: x[1], sorted(bicluster_terms, reverse=True)))
+        # feature_names = [feature_labels[idx] for idx in features]
         sample_names = [sample_labels[idx] for idx in samples]
         results += f"{name} Fused Module {i}:\n"
-        results += f"Features: {sorted(feature_names)}\n"
-        results += f"Samples_indices: {list(map(lambda x: int(x), samples))}\n"
+        results += f"Features: {feature_names}\n"
+        results += f"Samples_indices: {samples}\n"
         results += f"Samples_labels: {list(map(lambda x: int(x), sample_names))}\n\n"
         # print(results)
     with open(os.path.join("Results", name, f"biclusters.txt"), "w") as file:
         file.write(results)
+
+    return len(unique_samples)
 
 
 def threshold(x: np.array, t: int) -> np.array:
@@ -245,14 +258,10 @@ def manifold(
     solution = np.array(solution)
     solution = row_normalization(solution)
     if manifold_learner == "tsne":
-        tsne = TSNE(
-            n_components=2,
-            random_state=random_state,
-            perplexity=len(solution) - 1,
-        )
+        tsne = TSNE(n_components=2, random_state=random_state)
         embedded = tsne.fit_transform(solution)
     else:
-        reducer = umap.UMAP(random_state=random_state)
+        reducer = umap.UMAP()
         embedded = reducer.fit_transform(solution)
     fig = plt.figure(figsize=(10, 6))
     for i, cluster_label in enumerate(set(cluster_labels)):
@@ -268,7 +277,7 @@ def manifold(
 
 def display(
     sample_vec, feature_vec, name: str, vectorizer, data, labels, n_features
-) -> None:
+) -> int:
     """
     Create plots.
     :param sample_vec: The sample vectors.
@@ -278,15 +287,16 @@ def display(
     :param data: The data.
     :param labels: The labels.
     :param n_features: The number of features.
-    :return: Nothing.
+    :return: Number of unique samples chosen by atleast one bicluster
     """
     os.makedirs(os.path.join("Results", name), exist_ok=True)
-    display_fused_modules(
+    n_unique_samp = display_fused_modules(
         fused_features=feature_vec,
         fused_samples=sample_vec,
         feature_labels=vectorizer.get_feature_names_out(),
         sample_labels=labels,
         name=name,
+        data=data,
     )
     words = vectorizer.get_feature_names_out()
     # Get all samples and features.
@@ -362,6 +372,8 @@ def display(
         manifold_learner="umap",
     )
 
+    return n_unique_samp
+
 
 def isa_hyperparameter_test(
     data: np.array,
@@ -385,13 +397,15 @@ def isa_hyperparameter_test(
     """
     total_time = 0
     attempts = 0
+    mx_onmi, mx_vec = -np.inf, []
+    result = "feature_threshold,sample_threshold,fusion_jaccard_threshold,onmi,n_biclusters,time, n_unique_samples\n"
     for i in range(len(ts_feature)):
         for j in range(len(ts_sample)):
             for k in range(len(fs_ts)):
                 t0 = time()
                 sample_vec, feature_vec = isa(
                     data,
-                    n_initial=300,
+                    n_initial=900,
                     n_updates=20,
                     thresh_feature=ts_feature[i],
                     thresh_sample=ts_sample[j],
@@ -401,12 +415,25 @@ def isa_hyperparameter_test(
                 total_time += isa_time
                 attempts += 1
                 name = os.path.join(
-                    "ISA", f"f-{ts_feature[i]} s-{ts_sample[j]} fs-{fs_ts[k]}"
+                    "ISA",
+                    f"f-{ts_feature[i]:.2f} s-{ts_sample[j]:.2f} fs-{fs_ts[k]:.2f}",
                 )
-                display(
+                n_unique_sampl = display(
                     sample_vec, feature_vec, name, vectorizer, data, labels, n_features
                 )
-    return total_time / attempts
+                sample_vec_isa = sample_vec
+                onmi = evaluate_algorithms(
+                    labels, sample_vec_isa=sample_vec_isa, just_isa=True
+                )
+                if mx_onmi < onmi:
+                    mx_onmi = onmi
+                    mx_vec = sample_vec
+                result += f"{ts_feature[i]},{ts_sample[j]},{fs_ts[k]},{onmi},{len(sample_vec)},{isa_time},{n_unique_sampl}\n"
+
+    with open("./Results/isa_thresholds.csv", "w") as f:
+        f.write(result)
+
+    return total_time / attempts, mx_vec
 
 
 def main() -> None:
@@ -450,7 +477,7 @@ def main() -> None:
     with open(os.path.join("Results", f"Raw Sample.txt"), "w") as file:
         file.write(str(original[0]))
     # Vectorize the data.
-    vectorizer = TfidfVectorizer(max_df=0.5, min_df=4, stop_words="english")
+    vectorizer = TfidfVectorizer(max_df=0.5, min_df=3, stop_words="english")
     t0 = time()
     x_tfidf = vectorizer.fit_transform(original)
     vectorization_time = time() - t0
@@ -479,37 +506,17 @@ def main() -> None:
     plt.xlabel("Features")
     # Perform ISA.
     # Test hyperparameters for ISA.
-    # isa_time = isa_hyperparameter_test(
-    #     data=data,
-    #     vectorizer=vectorizer,
-    #     n_features=n_features,
-    #     labels=labels,
-    #     ts_feature=[0.5, 0.8, 1],
-    #     ts_sample=[0.9, 1.5, 1.8, 2.2],
-    #     fs_ts=[0.6],
-    # )
-    isa_time = isa_hyperparameter_test(
+    isa_time, sample_vec_isa = isa_hyperparameter_test(
         data=data,
         vectorizer=vectorizer,
         n_features=n_features,
         labels=labels,
-        ts_feature=[1.6],
-        ts_sample=[1.5],
-        fs_ts=[0.6],
+        ts_feature=np.linspace(0.5, 4, 15),
+        ts_sample=[1.13],
+        fs_ts=[0.7],
     )
     print(f"ISA done on average in {isa_time:.3f} s")
-
-    sample_vec, feature_vec = isa(
-        data,
-        n_initial=600,
-        n_updates=20,
-        thresh_feature=1.6,
-        thresh_sample=1.1,
-        fusion_similarity_threshold=0.6,
-    )
-    sample_vec_isa, feature_vec_isa = sample_vec, feature_vec
     # Perform K-Means.
-    true_k = 2
     kmeans = KMeans(n_clusters=true_k, random_state=random_state)
     t0 = time()
     kmeans.fit(data)
@@ -521,7 +528,7 @@ def main() -> None:
         sample_indices = np.where(kmeans.labels_ == cluster_label)[0]
         sample_vec.append(set(sample_indices))
     # Construct feature_vec from cluster centroids.
-    n_top_features = 50
+    n_top_features = 20
     feature_vec = []
     for cluster_label in range(true_k):
         centroid = kmeans.cluster_centers_[cluster_label]
@@ -531,9 +538,7 @@ def main() -> None:
 
     sample_vec_kmeans, feature_vec_kmeans = sample_vec, feature_vec
     # Perform spectral clustering.
-    spectral = SpectralClustering(
-        n_clusters=true_k, random_state=random_state, affinity="nearest_neighbors"
-    )
+    spectral = SpectralClustering(n_clusters=true_k, random_state=random_state)
     t0 = time()
     spectral_labels = spectral.fit_predict(data)
     spectral_time = time() - t0
@@ -544,7 +549,6 @@ def main() -> None:
         sample_indices = np.where(spectral_labels == cluster_label)[0]
         sample_vec.append(set(sample_indices))
     # Construct feature_vec by computing a centroid for each cluster.
-    n_top_features = 50
     feature_vec = []
     for cluster_label in range(true_k):
         cluster_data = data[list(sample_vec[cluster_label])]
@@ -554,7 +558,7 @@ def main() -> None:
         feature_vec.append(set(top_feature_indices))
     # Display results for Spectral Clustering.
     display(sample_vec, feature_vec, "Spectral", vectorizer, data, labels, n_features)
-    sample_vec_spectral, feature_vec_spectral = sample_vec, feature_vec
+    sample_vec_spectral = sample_vec
     # Save computation times statistics.
     with open(os.path.join("Results", f"Times.csv"), "w") as file:
         file.write(
@@ -566,14 +570,10 @@ def main() -> None:
         )
 
     evaluate_algorithms(
-        data,
         labels,
         sample_vec_isa,
-        feature_vec_isa,
         sample_vec_kmeans,
-        feature_vec_kmeans,
         sample_vec_spectral,
-        feature_vec_spectral,
     )
 
 
